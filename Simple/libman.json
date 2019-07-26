@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+	"libraries": [
+		{
+			"provider": "filesystem",
+			"library": "C:\\Users\\Sinjul_MSBH\\Desktop\\me",
+			"destination": "StaticFiles/imgs",
+			"files": [
+				"1.png",
+				"2.png"
+			]
+		}
+	]
+}
