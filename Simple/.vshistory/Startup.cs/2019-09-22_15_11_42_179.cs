@@ -37,7 +37,6 @@ namespace Simple
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllers();
             services.AddRazorPages();
 
             services.AddDirectoryBrowser();
@@ -138,13 +137,13 @@ namespace Simple
             //URI                                                       Response
             //http://<server_address>/StaticFiles/images/banner1.svg	MyStaticFiles/images/banner1.svg
             //http://<server_address>/StaticFiles	                    MyStaticFiles/default.html
-            //app.UseStaticFiles(); // For the wwwroot folder
-            //app.UseFileServer(new FileServerOptions
-            //{
-            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
-            //    RequestPath = "/MyStaticFiles",
-            //    EnableDirectoryBrowsing = false,
-            //});
+            app.UseStaticFiles(); // For the wwwroot folder
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
+                RequestPath = "/MyStaticFiles",
+                EnableDirectoryBrowsing = false,
+            });
 
             //https://www.iana.org/assignments/media-types/media-types.xhtml    See MIME content types.
             // Set up custom content types - associating file extension to MIME type
@@ -223,13 +222,12 @@ namespace Simple
             {
                 Configuration config = serverManager.GetWebConfiguration("Contoso");
 
-                // var directoryBrowseSection = config.GetSection("system.webServer/directoryBrowse");
+                var directoryBrowseSection = config.GetSection("system.webServer/directoryBrowse");
 
                 //enabled Optional Boolean attribute.
                 //Specifies whether directory browsing is enabled (true) or disabled (false) on the Web server.
                 //The default value is false.
-
-                //directoryBrowseSection["enabled"] = true;
+                directoryBrowseSection["enabled"] = true;
 
                 //showFlags Optional flags attribute.
                 //The showFlags attribute can have one or more of the following possible values.
@@ -242,10 +240,9 @@ namespace Simple
                 //None        Specifies that only the file or directory names are returned in a directory listing.
                 //Size        Includes the file size for a file in a directory listing.
                 //Time        Includes the last modified time for a file or directory in a directory listing.
+                directoryBrowseSection["showFlags"] = @"Date, Time, Size, Extension, LongDate";
 
-                //directoryBrowseSection["showFlags"] = @"Date, Time, Size, Extension, LongDate";
-
-                //serverManager.CommitChanges();
+                serverManager.CommitChanges();
             }
 
             //◘◘◘◘◘◘◘◘
@@ -257,7 +254,6 @@ namespace Simple
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
             });
         }

@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.IO;
 using System.Net;
@@ -13,8 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Web.Administration;
-
 using Simple.Data;
 
 namespace Simple
@@ -37,7 +35,6 @@ namespace Simple
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllers();
             services.AddRazorPages();
 
             services.AddDirectoryBrowser();
@@ -138,13 +135,13 @@ namespace Simple
             //URI                                                       Response
             //http://<server_address>/StaticFiles/images/banner1.svg	MyStaticFiles/images/banner1.svg
             //http://<server_address>/StaticFiles	                    MyStaticFiles/default.html
-            //app.UseStaticFiles(); // For the wwwroot folder
-            //app.UseFileServer(new FileServerOptions
-            //{
-            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
-            //    RequestPath = "/MyStaticFiles",
-            //    EnableDirectoryBrowsing = false,
-            //});
+            app.UseStaticFiles(); // For the wwwroot folder
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
+                RequestPath = "/MyStaticFiles",
+                EnableDirectoryBrowsing = false,
+            });
 
             //https://www.iana.org/assignments/media-types/media-types.xhtml    See MIME content types.
             // Set up custom content types - associating file extension to MIME type
@@ -223,32 +220,12 @@ namespace Simple
             {
                 Configuration config = serverManager.GetWebConfiguration("Contoso");
 
-                // var directoryBrowseSection = config.GetSection("system.webServer/directoryBrowse");
+                ConfigurationSection directoryBrowseSection = config.GetSection("system.webServer/directoryBrowse");
+                directoryBrowseSection["enabled"] = true;
+                directoryBrowseSection["showFlags"] = @"Date, Time, Size, Extension";
 
-                //enabled Optional Boolean attribute.
-                //Specifies whether directory browsing is enabled (true) or disabled (false) on the Web server.
-                //The default value is false.
-
-                //directoryBrowseSection["enabled"] = true;
-
-                //showFlags Optional flags attribute.
-                //The showFlags attribute can have one or more of the following possible values.
-                //If you specify more than one value, separate the values with a comma (,).
-                //The default values are Date, Time, Size, Extension.
-                //Value       Description
-                //Date        Includes the last modified date for a file or directory in a directory listing.
-                //Extension   Includes a file name extension for a file in a directory listing.
-                //LongDate    Includes the last modified date in extended format for a file in a directory listing.
-                //None        Specifies that only the file or directory names are returned in a directory listing.
-                //Size        Includes the file size for a file in a directory listing.
-                //Time        Includes the last modified time for a file or directory in a directory listing.
-
-                //directoryBrowseSection["showFlags"] = @"Date, Time, Size, Extension, LongDate";
-
-                //serverManager.CommitChanges();
+                serverManager.CommitChanges();
             }
-
-            //◘◘◘◘◘◘◘◘
 
             app.UseRouting();
 
@@ -257,7 +234,6 @@ namespace Simple
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
             });
         }

@@ -46,7 +46,6 @@
     <Content Include="StaticFiles\lib\jquery\dist\jquery.min.js" />
     <Content Include="StaticFiles\lib\jquery\dist\jquery.min.map" />
     <Content Include="StaticFiles\lib\jquery\LICENSE.txt" />
-    <Content Include="StaticFiles\videos\bandbaz.mp4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,7 +54,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0-rc1.19457.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0-rc1.19456.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0-rc1.19456.14" />
-    <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
   </ItemGroup>
 
   <ItemGroup>

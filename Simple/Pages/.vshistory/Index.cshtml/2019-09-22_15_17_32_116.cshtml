@@ -1,0 +1,34 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<img src="~/imgs/1.png" />
+<img src="~/StaticFiles/imgs/2.png" />
+<img src="~/MyImages/2.png" />
+<img src="~/MyStaticFiles/imgs/2.png" />
+<img asp-append-version="true" src="~/Images/MyImage" />
+<video controls="controls">
+    <source src="~/imgs/bandbaz.mp4" type="video/mp4" />
+</video>
+
+<a class="btn-link" asp-controller="Images" asp-action="MyImage">MyImage</a>
+
+@*<article class="text-center border rounded p-5 d-flex align-items-center justify-content-center align-content-center">
+        <img src="~/images/1.png" alt="image01" class="img-thumbnail img-fluid w-50" />
+        <img src="~/images/2.png" alt="image02" class="img-thumbnail img-fluid w-50" />
+    </article>*@
+
+@section Scripts{
+    <script>
+        var adminManager = new ActiveXObject('Microsoft.ApplicationHost.WritableAdminManager');
+        adminManager.CommitPath = "MACHINE/WEBROOT/APPHOST/Contoso";
+
+        var directoryBrowseSection = adminManager.GetAdminSection("system.webServer/directoryBrowse", "MACHINE/WEBROOT/APPHOST/Contoso");
+        directoryBrowseSection.Properties.Item("enabled").Value = true;
+        directoryBrowseSection.Properties.Item("showFlags").Value = "Date, Time, Size, Extension, LongDate";
+
+        adminManager.CommitChanges();
+    </script>
+}

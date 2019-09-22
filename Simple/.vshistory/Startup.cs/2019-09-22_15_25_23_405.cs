@@ -138,13 +138,13 @@ namespace Simple
             //URI                                                       Response
             //http://<server_address>/StaticFiles/images/banner1.svg	MyStaticFiles/images/banner1.svg
             //http://<server_address>/StaticFiles	                    MyStaticFiles/default.html
-            //app.UseStaticFiles(); // For the wwwroot folder
-            //app.UseFileServer(new FileServerOptions
-            //{
-            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
-            //    RequestPath = "/MyStaticFiles",
-            //    EnableDirectoryBrowsing = false,
-            //});
+            app.UseStaticFiles(); // For the wwwroot folder
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
+                RequestPath = "/MyStaticFiles",
+                EnableDirectoryBrowsing = false,
+            });
 
             //https://www.iana.org/assignments/media-types/media-types.xhtml    See MIME content types.
             // Set up custom content types - associating file extension to MIME type
@@ -257,7 +257,7 @@ namespace Simple
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
+                endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
         }
