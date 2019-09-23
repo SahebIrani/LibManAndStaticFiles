@@ -1,0 +1,74 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <UserSecretsId>aspnet-Simple-F67437AC-7223-45EE-B7A4-7ED5473EFDA4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\imgs\1.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="MyAssemblyStaticFiles\bandbaz.mp4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MyAssemblyStaticFiles\bandbaz.mp4">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="StaticFiles\css\site.css" />
+    <Content Include="StaticFiles\favicon.ico" />
+    <Content Include="StaticFiles\js\site.js" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-grid.css" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-reboot.css" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-reboot.min.css" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap.css" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap.css.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap.min.css" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.bundle.js" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.js" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.js.map" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.min.js" />
+    <Content Include="StaticFiles\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+    <Content Include="StaticFiles\lib\bootstrap\LICENSE" />
+    <Content Include="StaticFiles\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
+    <Content Include="StaticFiles\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
+    <Content Include="StaticFiles\lib\jquery-validation-unobtrusive\LICENSE.txt" />
+    <Content Include="StaticFiles\lib\jquery-validation\dist\additional-methods.js" />
+    <Content Include="StaticFiles\lib\jquery-validation\dist\additional-methods.min.js" />
+    <Content Include="StaticFiles\lib\jquery-validation\dist\jquery.validate.js" />
+    <Content Include="StaticFiles\lib\jquery-validation\dist\jquery.validate.min.js" />
+    <Content Include="StaticFiles\lib\jquery-validation\LICENSE.md" />
+    <Content Include="StaticFiles\lib\jquery\dist\jquery.js" />
+    <Content Include="StaticFiles\lib\jquery\dist\jquery.min.js" />
+    <Content Include="StaticFiles\lib\jquery\dist\jquery.min.map" />
+    <Content Include="StaticFiles\lib\jquery\LICENSE.txt" />
+    <Content Include="StaticFiles\videos\bandbaz.mp4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cofoundry.Web" Version="0.6.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.0.0-preview9.19424.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0-preview9.19424.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0-preview9.19424.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0-preview9.19423.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0-preview9.19423.6" />
+    <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\imgs\1.png" />
+  </ItemGroup>
+
+</Project>

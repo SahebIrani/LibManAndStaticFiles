@@ -28,18 +28,3 @@
         adminManager.CommitChanges();
     </script>
 }
-
-
-
-
-@using Cofoundry.Domain
-@inject Cofoundry.Web.ICofoundryHelper Cofoundry
-<div>
-    <img src="@Cofoundry.StaticFiles.AppendVersion("/content/my-cat.png")">
-
-    <span>@Cofoundry.StaticFiles.ToAbsoluteWithFileVersion("/content/my-cat.png")</span>
-
-    <video controls="controls">
-        <source src="@Cofoundry.StaticFiles.AppendVersion("/bandbaz.mp4")" type="video/mp4" />
-    </video>
-</div>

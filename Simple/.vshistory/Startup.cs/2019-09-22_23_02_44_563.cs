@@ -5,9 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -27,14 +24,12 @@ namespace Simple
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            Env = env;
         }
 
         public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Env { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -49,67 +44,10 @@ namespace Simple
             services.AddRazorPages();
 
             services.AddDirectoryBrowser();
-
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
-
-            //Just Call app.UseAuthentication() before app.UserMvc(...) in Configure Method.
-            services.AddAuthentication(sharedOptions =>
-            {
-                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                // sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
-
-                var basePath = Path.Combine(Env.ContentRootPath, "PrivateFiles");
-                var usersPath = Path.Combine(basePath, "Users");
-
-                // When using this policy users are only authorized to access the base directory, the Users directory,
-                // and their own directory under Users.
-                options.AddPolicy("files", builder =>
-                {
-                    builder.RequireAuthenticatedUser().RequireAssertion(context =>
-                    {
-                        var userName = context.User.Identity.Name;
-                        userName = userName?.Split('@').FirstOrDefault();
-                        if (userName == null)
-                        {
-                            return false;
-                        }
-                        var userPath = Path.Combine(usersPath, userName);
-                        if (context.Resource is IFileInfo file)
-                        {
-                            var path = Path.GetDirectoryName(file.PhysicalPath);
-                            return string.Equals(path, basePath, StringComparison.OrdinalIgnoreCase)
-                                || string.Equals(path, usersPath, StringComparison.OrdinalIgnoreCase)
-                                || string.Equals(path, userPath, StringComparison.OrdinalIgnoreCase)
-                                || path.StartsWith(userPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-                        }
-                        else if (context.Resource is IDirectoryContents dir)
-                        {
-                            // https://github.com/aspnet/Home/issues/3073
-                            // This won't work right if the directory is empty
-                            var path = Path.GetDirectoryName(dir.First().PhysicalPath);
-                            return string.Equals(path, basePath, StringComparison.OrdinalIgnoreCase)
-                                || string.Equals(path, usersPath, StringComparison.OrdinalIgnoreCase)
-                                || string.Equals(path, userPath, StringComparison.OrdinalIgnoreCase)
-                                || path.StartsWith(userPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-                        }
-
-                        throw new NotImplementedException($"Unknown resource type '{context.Resource.GetType()}'");
-                    });
-                });
-            });
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IAuthorizationService authorizationService)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -303,47 +241,6 @@ namespace Simple
                     //    headers.Add("Content-Encoding", "gzip");
                     //    headers["Content-Type"] = mimeType;
                     //}
-
-                    //IHeaderDictionary headers = sfrc.Context.Response.Headers;
-                    //string contentType = headers["Content-Type"];
-                    //if (contentType == "application/x-gzip")
-                    //{
-                    //    if (sfrc.File.Name.EndsWith("js.gz"))
-                    //    {
-                    //        contentType = "application/javascript";
-                    //    }
-                    //    else if (sfrc.File.Name.EndsWith("css.gz"))
-                    //    {
-                    //        contentType = "text/css";
-                    //    }
-                    //    headers.Add("Content-Encoding", "gzip");
-                    //    headers["Content-Type"] = contentType;
-                    //}
-
-                    //var provider = new FileExtensionContentTypeProvider();
-                    //string contentType;
-                    //if (!provider.TryGetContentType(fileName, out contentType))
-                    //{
-                    //    contentType = "application/octet-stream";
-                    //}
-
-                    //var headers = context.Context.Response.Headers;
-                    //var contentType = headers["Content-Type"];
-
-                    //if (contentType != "application/x-gzip" && !context.File.Name.EndsWith(".gz"))
-                    //{
-                    //    return;
-                    //}
-
-                    //var fileNameToTry = context.File.Name.Substring(0, context.File.Name.Length - 3);
-
-                    //if (mimeTypeProvider.TryGetContentType(fileNameToTry, out var mimeType))
-                    //{
-                    //    headers.Add("Content-Encoding", "gzip");
-                    //    headers["Content-Type"] = mimeType;
-                    //}
-
-
                 }
             });
             app.UseDirectoryBrowser(new DirectoryBrowserOptions
@@ -398,161 +295,31 @@ namespace Simple
 
             //◘◘◘◘◘◘◘◘
 
+            app.Run(async context =>
+            {
+                if (context.User?.Identities == null)
+                    await context.Response.WriteAsync("No user identities");
+
+                foreach (var id in context.User.Identities)
+                {
+                    var sb = new StringBuilder();
+
+                    sb.AppendLine("Identity");
+                    sb.AppendLine($"  Name: {id.Name}");
+                    sb.AppendLine($"  Label: {id.Label}");
+                    sb.AppendLine($"  AuthType: {id.AuthenticationType}");
+                    sb.AppendLine($"  Authenticated?: {id.IsAuthenticated}");
+                    var claims = string.Join(", ", id.Claims.Select(c => c.Value));
+                    sb.AppendLine($"  Claims: {claims}");
+
+                    await context.Response.WriteAsync(sb.ToString());
+                }
+            });
+
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-
-
-            //app.UseStaticFiles(new StaticFileOptions()
-            //{
-            //    OnPrepareResponse = async (response) =>
-            //    {
-            //        if (!response.Context.User.Identity.IsAuthenticated
-            //            && response.Context.Request.Path.StartsWithSegments("/MyFiles"))
-            //        {
-            //            await response.Context.ForbidAsync();
-            //            return;
-            //        }
-            //    }
-            //});
-
-            //static void HandleStaticFiles(IApplicationBuilder app)
-            //{
-            //    app.UseStaticFiles(new StaticFileOptions()
-            //    {
-            //        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "MyFiles")),
-            //        RequestPath = "/MyFiles"
-            //    });
-            //}
-            //app.MapWhen(context => context.User.Identity.IsAuthenticated && context.Request.Path.StartsWithSegments("/MyFiles"), HandleStaticFiles);
-
-            app.MapWhen(context => context.User.Identity.IsAuthenticated
-                        && context.Request.Path.StartsWithSegments("/MyFiles")
-            , appBuilder =>
-            {
-                appBuilder.UseStaticFiles(new StaticFileOptions()
-                {
-                    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "MyFiles")),
-                    RequestPath = "/MyFiles"
-                });
-            });
-
-            //app.UseWhen(context => context.User.Identity.IsAuthenticated
-            //            && context.Request.Path.StartsWithSegments("/MyFiles")
-            //, appBuilder =>
-            //{
-            //    appBuilder.UseStaticFiles(new StaticFileOptions()
-            //    {
-            //        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "MyFiles")),
-            //        RequestPath = "/MyFiles",
-            //        OnPrepareResponse = async (response) =>
-            //        {
-            //            if (!response.Context.User.Identity.IsAuthenticated
-            //                && response.Context.Request.Path.StartsWithSegments("/MyFiles"))
-            //            {
-            //                await response.Context.ForbidAsync();
-            //                return;
-            //            }
-            //        }
-            //    });
-            //});
-
-            //app.MapWhen(context => context.User.Identity.IsAuthenticated
-            //            && context.Request.Path.StartsWithSegments("/MyFiles")
-            //, appBuilder =>
-            //{
-            //    appBuilder.Run(async context =>
-            //    {
-            //        await context.ForbidAsync();
-            //        return;
-            //    });
-            //});
-
-
-            //app.Use(async (context, next) =>
-            //{
-            //    if (!context.User.Identity.IsAuthenticated
-            //        && context.Request.Path.StartsWithSegments("/MyFiles"))
-            //    {
-            //        await context.ForbidAsync();
-            //        return;
-            //    }
-            //    await next.Invoke();
-            //});
-
-
-
-
-
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                OnPrepareResponse = (context) =>
-                {
-                    if (!context.Context.User.Identity.IsAuthenticated && context.Context.Request.Path.StartsWithSegments("/MyImages"))
-                    {
-                        throw new Exception("Not authenticated");
-                    }
-                }
-            });
-
-            app.Use(async (context, next) =>
-            {
-                if (!context.User.Identity.IsAuthenticated
-                    && context.Request.Path.StartsWithSegments("/MyImages"))
-                {
-                    //throw new Exception("Not authenticated");
-                    context.Response.Redirect("/Login.html");
-                    return;
-                }
-                await next.Invoke();
-            });
-            app.Run(async context =>
-           {
-               if (context.User?.Identities == null)
-                   await context.Response.WriteAsync("No user identities");
-
-               foreach (var id in context.User.Identities)
-               {
-                   var sb = new StringBuilder();
-
-                   sb.AppendLine("Identity");
-                   sb.AppendLine($"  Name: {id.Name}");
-                   sb.AppendLine($"  Label: {id.Label}");
-                   sb.AppendLine($"  AuthType: {id.AuthenticationType}");
-                   sb.AppendLine($"  Authenticated?: {id.IsAuthenticated}");
-                   var claims = string.Join(", ", id.Claims.Select(c => c.Value));
-                   sb.AppendLine($"  Claims: {claims}");
-
-                   await context.Response.WriteAsync(sb.ToString());
-               }
-           });
-
-
-            var files = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "PrivateFiles"));
-
-            app.Map("/MapAuthenticatedFiles", branch =>
-            {
-                MapAuthenticatedFiles(branch, files);
-            });
-
-            app.Map("/MapImperativeFiles", branch =>
-            {
-                MapImperativeFiles(authorizationService, branch, files);
-            });
-
-            //app.UseLibraryServer(new LibraryServerOptions
-            //{
-            //    RequestPath = new PathString("/Library"),
-            //    PathProvider = dbContextOrRepositoryOrServiceInheritingILibraryPathProvider,
-            //    AuthenticationSchemes = new List<string> { CookieAuthenticationDefaults.AuthenticationScheme },
-            //    AuthorizationRequirements = new List<IAuthorizationRequirement> { new LibraryAuthorizationRequirement() },
-            //    LibraryFileOptions =
-            //    {
-            //        ServeUnknownFileTypes = true
-            //    }
-            //});
 
             app.UseEndpoints(endpoints =>
             {
@@ -574,59 +341,6 @@ namespace Simple
                         // Return here after authenticating
                         RedirectUri = context.Request.PathBase + context.Request.Path + context.Request.QueryString
                     });
-                    return;
-                }
-
-                await next();
-            });
-            branch.UseFileServer(new FileServerOptions()
-            {
-                EnableDirectoryBrowsing = true,
-                FileProvider = files
-            });
-        }
-
-
-        // Policy based authorization, requests must meet the policy criteria to be get access to the resources.
-        private static void MapImperativeFiles(IAuthorizationService authorizationService, IApplicationBuilder branch, PhysicalFileProvider files)
-        {
-            branch.Use(async (context, next) =>
-            {
-                var fileInfo = files.GetFileInfo(context.Request.Path);
-                AuthorizationResult result = null;
-                if (fileInfo.Exists)
-                {
-                    result = await authorizationService.AuthorizeAsync(context.User, fileInfo, "files");
-                }
-                else
-                {
-                    // https://github.com/aspnet/Home/issues/2537
-                    var dir = files.GetDirectoryContents(context.Request.Path);
-                    if (dir.Exists)
-                    {
-                        result = await authorizationService.AuthorizeAsync(context.User, dir, "files");
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = StatusCodes.Status404NotFound;
-                        return;
-                    }
-                }
-
-                if (!result.Succeeded)
-                {
-                    if (!context.User.Identity.IsAuthenticated)
-                    {
-                        await context.ChallengeAsync(new AuthenticationProperties()
-                        {
-                            // https://github.com/aspnet/Security/issues/1730
-                            // Return here after authenticating
-                            RedirectUri = context.Request.PathBase + context.Request.Path + context.Request.QueryString
-                        });
-                        return;
-                    }
-                    // Authenticated but not authorized
-                    await context.ForbidAsync();
                     return;
                 }
 

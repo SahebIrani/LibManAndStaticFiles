@@ -53,14 +53,6 @@ namespace Simple
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            //Just Call app.UseAuthentication() before app.UserMvc(...) in Configure Method.
-            services.AddAuthentication(sharedOptions =>
-            {
-                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                // sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            });
-
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
@@ -402,89 +394,6 @@ namespace Simple
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-
-
-            //app.UseStaticFiles(new StaticFileOptions()
-            //{
-            //    OnPrepareResponse = async (response) =>
-            //    {
-            //        if (!response.Context.User.Identity.IsAuthenticated
-            //            && response.Context.Request.Path.StartsWithSegments("/MyFiles"))
-            //        {
-            //            await response.Context.ForbidAsync();
-            //            return;
-            //        }
-            //    }
-            //});
-
-            //static void HandleStaticFiles(IApplicationBuilder app)
-            //{
-            //    app.UseStaticFiles(new StaticFileOptions()
-            //    {
-            //        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "MyFiles")),
-            //        RequestPath = "/MyFiles"
-            //    });
-            //}
-            //app.MapWhen(context => context.User.Identity.IsAuthenticated && context.Request.Path.StartsWithSegments("/MyFiles"), HandleStaticFiles);
-
-            app.MapWhen(context => context.User.Identity.IsAuthenticated
-                        && context.Request.Path.StartsWithSegments("/MyFiles")
-            , appBuilder =>
-            {
-                appBuilder.UseStaticFiles(new StaticFileOptions()
-                {
-                    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "MyFiles")),
-                    RequestPath = "/MyFiles"
-                });
-            });
-
-            //app.UseWhen(context => context.User.Identity.IsAuthenticated
-            //            && context.Request.Path.StartsWithSegments("/MyFiles")
-            //, appBuilder =>
-            //{
-            //    appBuilder.UseStaticFiles(new StaticFileOptions()
-            //    {
-            //        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "MyFiles")),
-            //        RequestPath = "/MyFiles",
-            //        OnPrepareResponse = async (response) =>
-            //        {
-            //            if (!response.Context.User.Identity.IsAuthenticated
-            //                && response.Context.Request.Path.StartsWithSegments("/MyFiles"))
-            //            {
-            //                await response.Context.ForbidAsync();
-            //                return;
-            //            }
-            //        }
-            //    });
-            //});
-
-            //app.MapWhen(context => context.User.Identity.IsAuthenticated
-            //            && context.Request.Path.StartsWithSegments("/MyFiles")
-            //, appBuilder =>
-            //{
-            //    appBuilder.Run(async context =>
-            //    {
-            //        await context.ForbidAsync();
-            //        return;
-            //    });
-            //});
-
-
-            //app.Use(async (context, next) =>
-            //{
-            //    if (!context.User.Identity.IsAuthenticated
-            //        && context.Request.Path.StartsWithSegments("/MyFiles"))
-            //    {
-            //        await context.ForbidAsync();
-            //        return;
-            //    }
-            //    await next.Invoke();
-            //});
-
-
-
-
 
             app.UseStaticFiles(new StaticFileOptions()
             {
